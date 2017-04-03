@@ -19,18 +19,24 @@
 
       <button id = "leave">leave</button>
     </div>
+    <div class = "room">
+      <ul id = "chat_room"></ul>
+    </div>
   </body>
   <script type = 'text/javascript' src = 'static/jquery-3.2.0.min.js'></script>
   <script type = 'text/javascript' src = 'static/mqttws31.js'></script>
   <script type = 'text/javascript' src = 'static/browserMqtt.js'></script>
+  <script type = 'text/javascript' src = 'static/socket.io.js'></script>
   <script type = 'text/javascript'>
   $(function(){
     var client = mqtt.connect('mqtt://test.mosca.io');
     var room;
+    var socket = io();
 
     $('#subscribe').click(function(){
       room = $('#room').val();
-      client.subscribe(room)
+      client.subscribe(room);
+      socket.emit('create_room', room);
     })
 
     $('#send').click(function(){
@@ -48,9 +54,15 @@
     $("#leave").click(function(){
       client.unsubscribe(room, function(){
         $("#chat_message").append("<li> leave from "+ room + "</li>");
+        $("ul#chat_room li:contains('"+ room + "')").remove();
         $("#room").val('');
       });
     })
+
+    socket.on('room_information', function(data){
+      $("#chat_room").append("<li>" + data + "</li>");
+    });
+
   });
   </script>
 </html>

@@ -7,10 +7,21 @@ var urlencodedParser = bodyParser.urlencoded({extended: false});
 var path = require('path');
 var PORT = 8000;
 var router = require('./router/index.js');
-
-app.listen(8000, function(){
+var server = app.listen(8000, function(){
   console.log("listening PORT " + PORT);
 });
+
+var io = require('socket.io')(server);
+
+var mongoose = require('mongoose');
+mongoose.connect('localhost:27017/mqtt_chat');
+var Schema = mongoose.Schema;
+var userDataSchema = new Schema({
+  topic: String,
+  content: String
+});
+
+var UserData = mongoose.model('UserData', userDataSchema);
 
 app.use(urlencodedParser);
 app.use('/static', express.static('./static'));
@@ -20,12 +31,20 @@ app.get('/', function(req, res){
   res.sendFile(path.join(__dirname, '/view', 'index.html'));
 });
 
-client.on('connect', function(){
-  client.subscribe('3202');
-  client.publish('3202', 'hello');
+io.on('connection', function(socket){
+  socket.on('create_room', function(data){
+    client.subscribe(data);
+    console.log('subscribe to ' + data);
+    io.emit('room_information', data);
+  });
 });
 
 client.on('message', function(topic, message){
-  if (topic === '3202')
-    console.log(message.toString());
+  var new_message = {};
+  new_message.topic = topic;
+  new_message.content = message;
+
+  var new_data = new UserData(new_message);
+  new_data.save();
+  console.log(new_data + ' is saved');
 });
