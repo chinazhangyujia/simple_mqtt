@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>chat room mqtt</title>
+    <h2>chat room mqtt</h2>
+  </head>
+  <body>
+    <div class = "message">
+      <ul id = "chat_message"></ul>
+    </div>
+    <div>
+      <form>
+        <p>room: <input type="text" id = "room"/>
+          <input type = "button" id = "subscribe" value = "in"/>
+        </p>
+        <p>chat box: <input type="text" id = "content"/>
+          <input type = "button" id = "send" value = "send"/>
+        </p>
+      </form>
+
+      <button id = "leave">leave</button>
+    </div>
+  </body>
+  <script type = 'text/javascript' src = 'static/jquery-3.2.0.min.js'></script>
+  <script type = 'text/javascript' src = 'static/mqttws31.js'></script>
+  <script type = 'text/javascript' src = 'static/browserMqtt.js'></script>
+  <script type = 'text/javascript'>
+  $(function(){
+    var client = mqtt.connect('mqtt://test.mosca.io');
+    var room;
+
+    $('#subscribe').click(function(){
+      room = $('#room').val();
+      client.subscribe(room)
+    })
+
+    $('#send').click(function(){
+      client.publish(room, $('#content').val());
+      $("#content").val('');
+    })
+
+    client.on('message', function(topic, message){
+      if (topic === room){
+        var data = message.toString();
+        $("#chat_message").append("<li>" + data + "</li>");
+      }
+    })
+
+    $("#leave").click(function(){
+      client.unsubscribe(room, function(){
+        $("#chat_message").append("<li> leave from "+ room + "</li>");
+        $("#room").val('');
+      });
+    })
+  });
+  </script>
+</html>
