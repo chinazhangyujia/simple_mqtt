@@ -20,6 +20,7 @@
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "mongoose": "^4.9.3",
+    "mosca": "^2.3.0",
     "mqtt": "^2.5.1",
     "socket.io": "^1.7.3"
   }

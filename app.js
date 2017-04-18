@@ -2,6 +2,8 @@ var express = require('express');
 var app = express();
 var mqtt = require('mqtt');
 var client  = mqtt.connect('mqtt://test.mosca.io');
+//var client = mqtt.connect('tcp://broker.hivemq.com:1883');
+//var client = mqtt.connect('localhost:1883');
 var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({extended: false});
 var path = require('path');
@@ -21,7 +23,7 @@ var userDataSchema = new Schema({
   content: String
 });
 
-var UserData = mongoose.model('UserData', userDataSchema);
+var UserData = mongoose.model('mqtt_chat_room', userDataSchema);
 
 app.use(urlencodedParser);
 app.use('/static', express.static('./static'));
